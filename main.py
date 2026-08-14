@@ -46,6 +46,20 @@ MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "100"))
 MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
 JOB_TTL_HOURS = float(os.environ.get("JOB_TTL_HOURS", "48"))
 
+# YouTube bot-blokirovkasiga qarshi cookies:
+#   YT_COOKIES_FILE — Netscape formatdagi cookies.txt faylining yo'li
+#   YT_COOKIES      — cookies.txt kontentining o'zi (env o'zgaruvchi sifatida,
+#                     Render kabi platformalarda fayl yuklash qiyin bo'lsa)
+YT_COOKIES_FILE = os.environ.get("YT_COOKIES_FILE", "").strip()
+YT_COOKIES = os.environ.get("YT_COOKIES", "").strip()
+COOKIES_PATH = DATA_DIR / "cookies.txt"
+
+if YT_COOKIES and not Path(YT_COOKIES_FILE).exists():
+    # Env o'zgaruvchidagi kontentni faylga yozamiz (yt-dlp fayl kutadi)
+    COOKIES_PATH.parent.mkdir(parents=True, exist_ok=True)
+    COOKIES_PATH.write_text(YT_COOKIES, "utf-8")
+    YT_COOKIES_FILE = str(COOKIES_PATH)
+
 AUDIO_EXTS = {
     ".mp3", ".wav", ".m4a", ".aac", ".ogg", ".opus",
     ".flac", ".webm", ".mp4", ".m4b", ".aiff", ".aif",
@@ -201,10 +215,10 @@ def _yt_opts(dest: Path) -> dict:
             "preferredquality": "192",
         }]
 
-    # 403 xatosini hal qilish: brauzer cookies fayli (Netscape formatdagi cookies.txt)
-    cookies_file = os.environ.get("YT_COOKIES_FILE", "").strip()
-    if cookies_file and Path(cookies_file).exists():
-        opts["cookiefile"] = cookies_file
+    # 403 / bot-blokirovka xatosini hal qilish: brauzer cookies fayli
+    # (Netscape formatdagi cookies.txt — YT_COOKIES env orqali ham berilishi mumkin)
+    if YT_COOKIES_FILE and Path(YT_COOKIES_FILE).exists():
+        opts["cookiefile"] = YT_COOKIES_FILE
 
     # Yoki brauzerdan to'g'ridan-to'g'ri cookies olish (lokal ishga tushirishda)
     browser = os.environ.get("YT_BROWSER", "").strip().lower()

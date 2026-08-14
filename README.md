@@ -89,16 +89,21 @@ docker run -p 8000:8000 -v 8d-data:/data 8d-karaoke
 | `GET /api/audio/{id}` | Audio fayl (brauzer o'ynatadi) |
 | `GET /api/health` | Server holati |
 
-## YouTube 403 xatosi (Troubleshooting)
+## YouTube 403 / bot-blokirovka xatosi (Troubleshooting)
 
-Agar "YouTube'dan yuklab bo'lmadi: HTTP Error 403: Forbidden" chiqsa —
-YouTube so'rovni bloklagan. Tartibda shu yechimlarni sinab ko'ring:
+Agar "YouTube'dan yuklab bo'lmadi: HTTP Error 403: Forbidden" yoki
+"Sign in to confirm you're not a bot" chiqsa — YouTube so'rovni bloklagan
+(ayniqsa Render kabi datacenter IP'larida). Tartibda shu yechimlarni sinab ko'ring:
 
 1. **yt-dlp ni yangilang:** `pip install -U yt-dlp`
 2. **Brauzer cookies bering** — YouTube ko'pincha anonim so'rovlarni bloklaydi:
-   - "Get cookies.txt LOCALLY" kengaytmasi bilan cookies.txt oling va
-     `YT_COOKIES_FILE=/path/to/cookies.txt` qilib ishga tushiring
-   - Yoki lokal rejimda: `YT_BROWSER=chrome` (brauzer ma'lumotlaridan o'qiydi)
+   - "Get cookies.txt LOCALLY" kengaytmasi bilan `cookies.txt` oling
+   - **Render'da**: faylni yuklash qiyin, shuning uchun kontentni
+     `YT_COOKIES` env o'zgaruvchisiga qo'ying (Render Dashboard → Environment →
+     Add Environment Variable). Kontentda `# Netscape HTTP Cookie File`
+     sarlavhasi va `\n` yangi qatorlar bo'lishi kerak.
+   - Yoki serverda fayl mavjud bo'lsa: `YT_COOKIES_FILE=/path/to/cookies.txt`
+   - Lokal rejimda: `YT_BROWSER=chrome` (brauzer ma'lumotlaridan o'qiydi)
 3. **VPN/proksi o'chiring** — datacenter/VPN IP'lari ko'pincha bloklanadi
 4. Video mualliflik huquqi yoki mintaqa bo'yicha cheklangan bo'lishi mumkin
 
