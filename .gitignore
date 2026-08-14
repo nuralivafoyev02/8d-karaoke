@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Ma'lumotlar (joblar + audio)
+data/
+
+# Muhit
+.env
+
+# macOS
+.DS_Store

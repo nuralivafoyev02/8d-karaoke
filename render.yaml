@@ -1,0 +1,18 @@
+# Render.com da deploy qilish (https://render.com) — bepul tier
+# 1. Bu kodni GitHub'ga yuklang (ommaviy repo)
+# 2. Render -> New -> Web Service -> "Public Git Repository" -> repo URL'ni joylashtiring
+#    (GitHub-Render integratsiyasi shart emas!)
+# 3. Render Dockerfile'ni avtomatik topadi va quradi
+services:
+  - type: web
+    name: 8d-karaoke
+    runtime: docker
+    plan: free
+    envVars:
+      # 512MB RAM cheklovi uchun "tiny" model (base ~1GB kerak bo'ladi)
+      - key: WHISPER_MODEL
+        value: tiny
+      - key: WHISPER_DEVICE
+        value: cpu
+      - key: WHISPER_COMPUTE
+        value: int8

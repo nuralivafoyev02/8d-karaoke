@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>8D Karaoke — Qo'shiqni 8D formatda tinglang</title>
+  <meta name="description" content="YouTube yoki MP3 faylni 8D formatda jonli tinglang va matnini karaoke kabi ko'ring">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <h1>🎧 8D Karaoke</h1>
+    <p class="tagline">
+      Qo'shiqni <strong>8D formatda</strong> jonli tinglang va matnini <strong>karaoke</strong> kabi ko'ring
+      <span class="en">— Listen live in 8D and watch lyrics karaoke-style</span>
+    </p>
+  </header>
+
+  <main>
+    <!-- Kirish: YouTube yoki fayl -->
+    <section id="inputSection" class="card">
+      <div class="tabs">
+        <button id="tabUrl" class="tab active" type="button">🔗 YouTube havola</button>
+        <button id="tabFile" class="tab" type="button">📁 Fayl yuklash</button>
+      </div>
+
+      <div id="urlPanel" class="panel">
+        <div class="row">
+          <input id="urlInput" type="url" spellcheck="false"
+                 placeholder="https://www.youtube.com/watch?v=..." aria-label="YouTube havola">
+          <button id="urlBtn" class="btn primary" type="button">Yuklash va tahlil qilish</button>
+        </div>
+        <p class="hint">Havolani joylashtiring — audio avtomatik yuklab olinadi va lirika topiladi.
+          <span class="en">Paste a link — audio is downloaded and lyrics are detected automatically.</span></p>
+      </div>
+
+      <div id="filePanel" class="panel hidden">
+        <div id="dropZone" role="button" tabindex="0" aria-label="Audio fayl yuklash">
+          <div class="dropIcon">🎵</div>
+          <p>MP3, WAV, M4A, OGG... faylni shu yerga tashlang yoki bosing</p>
+          <p class="en">Drag &amp; drop an audio file here, or click to choose</p>
+        </div>
+        <input id="fileInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.opus,.flac,.aac" hidden>
+      </div>
+
+      <div id="progress" class="hidden">
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="progressText">Yuklab olinmoqda va tahlil qilinmoqda...</p>
+      </div>
+
+      <div id="errorBox" class="error hidden" role="alert"></div>
+    </section>
+
+    <!-- Player -->
+    <section id="playerSection" class="card hidden">
+      <div id="songInfo">
+        <h2 id="songTitle"></h2>
+        <p id="songMeta" class="muted"></p>
+      </div>
+
+      <div class="player">
+        <button id="playBtn" class="play" type="button" aria-label="O'ynatish / Pauza">▶</button>
+        <div class="seekWrap">
+          <input id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Vaqt">
+          <div class="times">
+            <span id="curTime">0:00</span>
+            <span id="totalTime">0:00</span>
+          </div>
+        </div>
+        <div class="volWrap" title="Ovoz balandligi / Volume">
+          <span>🔊</span>
+          <input id="volume" type="range" min="0" max="100" value="80" aria-label="Ovoz balandligi">
+        </div>
+      </div>
+
+      <div class="controls">
+        <h3>8D sozlamalari <span class="en">(8D settings — live)</span></h3>
+        <div class="sliders">
+          <label>
+            <span class="lbl">🔄 Aylanish tezligi <span class="en">(Rotation speed)</span></span>
+            <input id="speed" type="range" min="1" max="40" value="12">
+            <span class="val" id="speedVal">0.12 Hz</span>
+          </label>
+          <label>
+            <span class="lbl">🌀 Effekt kuchi <span class="en">(Pan depth)</span></span>
+            <input id="depth" type="range" min="0" max="100" value="90">
+            <span class="val" id="depthVal">90%</span>
+          </label>
+          <label>
+            <span class="lbl">🌊 Aks-sado <span class="en">(Reverb)</span></span>
+            <input id="reverb" type="range" min="0" max="100" value="35">
+            <span class="val" id="reverbVal">35%</span>
+          </label>
+        </div>
+        <button id="resetBtn" class="btn ghost" type="button">↺ Standartga qaytarish <span class="en">(Reset)</span></button>
+      </div>
+    </section>
+
+    <!-- Lirika -->
+    <section id="lyricsSection" class="card hidden">
+      <h3>📝 Qo'shiq matni <span class="en">(Lyrics)</span></h3>
+      <div id="lyricsScroll">
+        <div id="lyrics" aria-live="polite"></div>
+      </div>
+      <p id="noLyrics" class="muted hidden">
+        Matn topilmadi — asar instrumental bo'lishi mumkin.
+        <span class="en">No lyrics found — the track may be instrumental.</span>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>8D effekt brauzeringizda Web Audio API orqali jonli qo'llanadi. Lirika faster-whisper (AI) bilan topiladi.</p>
+    <p class="en">The 8D effect is applied live in your browser via Web Audio API. Lyrics are detected with faster-whisper (AI).</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
