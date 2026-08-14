@@ -54,10 +54,57 @@ YT_COOKIES_FILE = os.environ.get("YT_COOKIES_FILE", "").strip()
 YT_COOKIES = os.environ.get("YT_COOKIES", "").strip()
 COOKIES_PATH = DATA_DIR / "cookies.txt"
 
-if YT_COOKIES and not Path(YT_COOKIES_FILE).exists():
+
+def _normalize_cookies(content: str) -> str:
+    """cookies.txt kontentini Netscape formatiga keltiradi.
+
+    Ko'p hollarda paste/ko'chirish paytida tab belgilar space'ga, yoki
+    '\\n'/'\\t' literal ko'rinishida qoladi — yt-dlp esa qat'iy tab
+    formatini talab qiladi. Shu funksiya bularni tuzatadi.
+    """
+    # Literal \n va \t (ko'chirishda buzilib qolgan bo'lsa)
+    content = content.replace("\\n", "\n").replace("\\t", "\t")
+    lines = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            lines.append(stripped)
+            continue
+        # Tab o'rniga bir nechta space bo'lsa — tab'ga aylantiramiz
+        if "\t" not in line:
+            parts = line.split()
+            if len(parts) >= 7:  # domain ... name value
+                line = "\t".join(parts)
+        lines.append(line)
+    return "\n".join(lines) + "\n"
+
+
+def _cookies_diagnostics() -> dict:
+    """Cookies holati haqida ma'lumot — /api/health orqali ko'rish mumkin."""
+    info = {
+        "yt_cookies_env_set": bool(YT_COOKIES),
+        "yt_cookies_file_env": YT_COOKIES_FILE or None,
+        "cookies_file_exists": False,
+        "cookies_lines": 0,
+        "cookies_header_ok": False,
+        "cookies_tabs_ok": None,
+    }
+    if YT_COOKIES_FILE and Path(YT_COOKIES_FILE).exists():
+        raw = Path(YT_COOKIES_FILE).read_text("utf-8", errors="replace")
+        info["cookies_file_exists"] = True
+        info["cookies_lines"] = len([l for l in raw.splitlines() if l.strip()])
+        info["cookies_header_ok"] = raw.lstrip().startswith("# Netscape HTTP Cookie File")
+        data_lines = [l for l in raw.splitlines() if l.strip() and not l.strip().startswith("#")]
+        info["cookies_tabs_ok"] = all("\t" in l for l in data_lines) if data_lines else None
+    return info
+
+
+if YT_COOKIES and not (YT_COOKIES_FILE and Path(YT_COOKIES_FILE).exists()):
     # Env o'zgaruvchidagi kontentni faylga yozamiz (yt-dlp fayl kutadi)
     COOKIES_PATH.parent.mkdir(parents=True, exist_ok=True)
-    COOKIES_PATH.write_text(YT_COOKIES, "utf-8")
+    COOKIES_PATH.write_text(_normalize_cookies(YT_COOKIES), "utf-8")
     YT_COOKIES_FILE = str(COOKIES_PATH)
 
 AUDIO_EXTS = {
@@ -281,7 +328,13 @@ def _startup() -> None:
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "model": MODEL_NAME, "ffmpeg": bool(shutil.which("ffmpeg"))}
+    return {
+        "status": "ok",
+        "model": MODEL_NAME,
+        "ffmpeg": bool(shutil.which("ffmpeg")),
+        "yt_dlp_version": getattr(yt_dlp.version, "__version__", "?") if yt_dlp else None,
+        "cookies": _cookies_diagnostics(),
+    }
 
 
 class YouTubeRequest(BaseModel):
